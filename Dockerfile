@@ -1,19 +1,21 @@
+# Stage 1: Build AutoX
 FROM maven:3.9-eclipse-temurin-21 AS build
 
 WORKDIR /app
 
+# Copy project configuration
 COPY pom.xml .
-COPY .mvn .mvn
-COPY mvnw .
 
-RUN chmod +x mvnw
+# Download dependencies using the installed Maven
+RUN mvn -B dependency:go-offline
 
-RUN ./mvnw dependency:go-offline
+# Copy source code
+COPY src ./src
 
-COPY src src
+# Build the application
+RUN mvn -B clean package -DskipTests
 
-RUN ./mvnw clean package -DskipTests
-
+# Stage 2: Run AutoX
 FROM eclipse-temurin:21-jre
 
 WORKDIR /app
